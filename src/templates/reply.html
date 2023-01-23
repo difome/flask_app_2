@@ -1,0 +1,22 @@
+{% for message in messages %}
+<div class="card">
+<div class="card-body">
+<div class="message-time text-secondary">{{ message.created_at|format_datetime }}</div>
+<p class="card-text"><b>{{ message.user.name }}</b></p>
+<p class="card-text">{{ message.message }}</p>
+<button class="btn btn-primary" onclick="showReplyForm({{ message.id }})">Ответить</button>
+<div id="reply-form" style="display:none;">
+<form method="post" action="{{ url_for('main.reply', message_id=message.id) }}">
+<i class="fa fa-times close-form" onclick="hideReplyForm()">Закрыть</i>
+{{ reply_form.hidden_tag() }}
+<div class="form-group mb-3">
+{{ reply_form.message.label }} {{ reply_form.message(class="form-control") }}
+</div>
+<button type="submit" class="btn btn-primary">Отправить</button>
+</form>
+</div>
+</div>
+</div>
+{% for reply in message.replies %}
+{% include 'chat.html' with messages=reply %}
+{% endfor %}

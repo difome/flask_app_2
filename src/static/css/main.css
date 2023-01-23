@@ -1,0 +1,13 @@
+.chat .chat-history .other-message {
+    background: #e8f1f3;
+    text-align: right;
+}
+.chat .chat-history .message {
+    color: #444;
+    padding: 18px 20px;
+    line-height: 26px;
+    font-size: 16px;
+    border-radius: 7px;
+    display: inline-block;
+    position: relative;
+}

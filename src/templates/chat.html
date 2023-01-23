@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+
+    <div class="container">
+        <h1>Чат</h1>
+
+        <div class="col-md-8">
+            <form method="post" action="{{ url_for('main.chat') }}" id="chat-form">
+                {{ form.hidden_tag() }}
+                <div class="form-group mb-3">
+                    {{ form.message(id_="m",class="form-control") }}
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+        <br/>
+
+        <div class="row">
+
+
+            <div class="col-md-8">
+                {% for message in messages %}
+                    <div id="messages"></div>
+
+                    {% for reply in message.replies %}
+                        <div class="card" id="chat-messages">
+                            <div class="card-body">
+                                <div class="message-time text-secondary">{{ reply.reply.created_at|format_datetime }}</div>
+
+
+                                <div class="flex-shrink-1 bg-light py-2 px-3 ml-3" style="
+    border-left: 4px solid #222;
+">
+                                    <div class="fw-bold mb-1"></div>
+                                    {{ reply.reply.message }}
+                                </div>
+
+                                <div class="flex-shrink-1 rounded py-2 px-3 ml-3">
+                                    <div class="fw-bold mb-1">{{ reply.user.name }}</div>
+                                    {{ reply.message }}
+                                </div>
+
+                            </div>
+
+                        </div>
+                    {% endfor %}
+
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="message-time text-secondary">{{ message.created_at|format_datetime }}</div>
+                            <p class="card-text"><b>{{ message.user.name }}</b></p>
+                            <p class="card-text">{{ message.message }}</p>
+                            {#                            <form method="post" action="{{ url_for('main.reply', message_id=message.id) }}">#}
+                            {#                                {{ reply_form.hidden_tag() }}#}
+                            {#                                {{ reply_form.message.label }} {{ reply_form.message(class="form-control") }}#}
+                            {#                                <input type="submit" value="Reply">#}
+                            <button class="btn btn-primary" onclick="showReplyForm({{ message.id }})">Ответить</button>
+                            <div id="reply-form" style="display:none;">
+                                <form method="post" action="{{ url_for('main.reply', message_id=message.id) }}"
+                                      id="chat-form">
+                                    <i class="fa fa-times close-form" onclick="hideReplyForm()">Закрыть</i>
+                                    {{ reply_form.hidden_tag() }}
+                                    <div class="form-group mb-3">
+                                        {{ reply_form.message.label }}
+                                                            {{ reply_form.message(id_="m",class="form-control") }}
+
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Отправить</button>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <script>
+                function showReplyForm(message_id) {
+                    document.getElementById("reply-form").style.display = "block";
+                    document.getElementById("message_id").value = message_id;
+                }
+
+                function hideReplyForm() {
+                    document.getElementById("reply-form").style.display = "none";
+                }
+
+                var socket = io.connect('http://' + document.domain + ':' + location.port);
+                var user_name = "{{current_user.name}}";
+                socket.on('connect', function () {
+                    $('form').submit(function () {
+                        socket.emit('send_message', {message: $('#m').val(), user_name: user_name});
+                        $('#m').val('');
+                        return false;
+                    });
+                });
+                socket.on('receive_message', function (data) {
+                    $('#messages').prepend('<div class="card"><div class="card-body"><div class="message-time text-secondary">' + new Date(data.created_at).toLocaleString() + '</div><p class="card-text"><b>' + data.user_name + '</b></p><p class="card-text">' + data.message + '</p></div></div>');
+                });
+            </script>
+
+        </div>
+    </div>
+
+{% endblock %}

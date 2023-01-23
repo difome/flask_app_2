@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <h1>Visit History</h1>
+  <div class="row">
+    <div class="col-md-12">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>IP Address</th>
+            <th>Browser</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for visit in visits %}
+            <tr>
+              <td>{{ visit.timestamp }}</td>
+              <td>{{ visit.ip_address }}</td>
+              <td>{{ visit.browser }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+    {% endblock %}
